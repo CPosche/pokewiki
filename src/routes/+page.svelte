@@ -107,6 +107,17 @@
 			</div>
 		</div>
 
+		<div class="mb-8 flex justify-between">
+			{#each generations as generation}
+				{@const generationNameArr = generation.name.split('-')}
+				<a href="{generation.url.split('v2')[1]}" class="flex-1 mx-2">
+					<div class="flex flex-col bg-white/10 backdrop-blur-md rounded-3xl p-8 text-center">
+						<span class="font-bold text-white">{generationNameArr[0]}</span>
+						<span class="text-white/80">{generationNameArr[1]}</span>
+					</div>
+				</a>
+			{/each}
+		</div>
 		<!-- Quick Stats -->
 		<div class="grid md:grid-cols-3 gap-6 mb-12">
 			<div class="bg-white/20 backdrop-blur-md rounded-2xl p-6 text-center hover:bg-white/30 transition-colors duration-300">
@@ -121,10 +132,6 @@
 				<div class="text-4xl font-bold text-white">18</div>
 				<div class="text-white/80">Pokémon Types</div>
 			</div>
-            <div class="bg-white/20 backdrop-blur-md rounded-2xl p-6 text-center hover:bg-white/30 transition-colors duration-300">
-                <div class="text-4xl font-bold text-white">{generations.length}</div>
-                <div class="text-white/80">Generations</div>
-            </div>
 		</div>
 
 		<!-- Pokemon Grid Preview -->

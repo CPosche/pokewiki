@@ -6,7 +6,27 @@
 	$: pokemon = data.pokemon;
 	$: species = data.species;
 	$: evolutionChain = data.evolutionChain;
-	
+	$: pokemonSkins = data.pokemonSkins;
+
+	// Carousel state for Pokemon skins
+	let currentImageIndex = 0;
+	$: allImages = [
+		pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default,
+		...pokemonSkins.filter(skin => skin && skin !== (pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default))
+	].filter(Boolean);
+
+	const nextImage = () => {
+		currentImageIndex = (currentImageIndex + 1) % allImages.length;
+	};
+
+	const prevImage = () => {
+		currentImageIndex = currentImageIndex === 0 ? allImages.length - 1 : currentImageIndex - 1;
+	};
+
+	const goToImage = (index: number) => {
+		currentImageIndex = index;
+	};
+
 	// Get the English flavor text
 	$: flavorText = species.flavor_text_entries
 		.find(entry => entry.language.name === 'en')
@@ -115,22 +135,58 @@
 		<!-- Main Pokemon Card -->
 		<div class="bg-white/20 backdrop-blur-md rounded-3xl p-8 mb-8 shadow-2xl">
 			<div class="grid md:grid-cols-2 gap-8 items-center">
-				<!-- Pokemon Image -->
 				<div class="text-center">
 					<div class="relative">
-						<img 
-							src={pokemon.sprites.other?.['official-artwork']?.front_default || pokemon.sprites.front_default} 
-							alt={pokemon.name}
-							class="w-80 h-80 mx-auto drop-shadow-2xl hover:scale-105 transition-transform duration-300"
-						/>
+						<div class="relative rounded-2xl">
+							<img 
+								src={allImages[currentImageIndex]} 
+								alt={pokemon.name}
+								class="w-80 h-80 mx-auto drop-shadow-2xl hover:scale-105 transition-all duration-300 relative z-10"
+							/>
+							
+							{#if allImages.length > 1}
+								<button 
+									on:click={prevImage}
+									aria-label="Previous image"
+									class="absolute left-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+								>
+									<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+									</svg>
+								</button>
+								<button 
+									on:click={nextImage}
+									aria-label="Next image"
+									class="absolute right-4 top-1/2 transform -translate-y-1/2 bg-white/20 hover:bg-white/40 backdrop-blur-sm rounded-full p-2 transition-all duration-200"
+								>
+									<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+										<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+									</svg>
+								</button>
+							{/if}
+						</div>
+
+						{#if allImages.length > 1}
+							<div class="flex justify-center gap-2 mt-4">
+								{#each allImages as _, index}
+									<button 
+										on:click={() => goToImage(index)}
+										aria-label="Go to image {index + 1}"
+										class="w-3 h-3 rounded-full transition-all duration-200 {currentImageIndex === index ? 'bg-white' : 'bg-white/40 hover:bg-white/60'}"
+									></button>
+								{/each}
+							</div>
+						{/if}
+
+						<!-- Legendary/Mythical Badges -->
 						{#if species.is_legendary}
 							<div class="absolute top-4 right-4 bg-yellow-400 text-gray-800 px-3 py-1 rounded-full text-sm font-bold">
-								P Legendary
+								★ Legendary
 							</div>
 						{/if}
 						{#if species.is_mythical}
 							<div class="absolute top-4 right-4 bg-purple-400 text-white px-3 py-1 rounded-full text-sm font-bold">
-								( Mythical
+								✧ Mythical
 							</div>
 						{/if}
 					</div>
@@ -234,38 +290,19 @@
 			</div>
 		</div>
 
-		<!-- Stats Section -->
-		<div class="bg-white/20 backdrop-blur-md rounded-3xl p-8 mb-8">
-			<h2 class="text-3xl font-bold text-white mb-6 text-center">Base Stats</h2>
-			<div class="grid gap-4">
+			<div class="stats stats-vertical lg:stats-horizontal shadow bg-white/20 backdrop-blur-md rounded-3xl mb-8">
 				{#each pokemon.stats as stat}
-					<div class="flex items-center gap-4">
-						<div class="w-32 text-white font-semibold capitalize text-right">
-							{stat.stat.name.replace('-', ' ')}
-						</div>
-						<div class="w-16 text-white font-bold text-center">
-							{stat.base_stat}
-						</div>
-						<div class="flex-1 bg-white/20 rounded-full h-4 overflow-hidden">
-							<div 
-								class="h-full rounded-full transition-all duration-1000 {getStatColor(stat.base_stat)}"
-								style="width: {getStatPercentage(stat.base_stat)}%"
-							></div>
+					<div class="stat">
+						<div class="stat-title">{stat.stat.name.replace('-', ' ').toUpperCase()}</div>
+						<div class="stat-value">{stat.base_stat}</div>
+						<div class="stat-desc">
+							<div class="w-full bg-gray-300 rounded-full h-2.5 dark:bg-gray-700">
+								<div class="{getStatColor(stat.base_stat)} h-2.5 rounded-full" style="width: {getStatPercentage(stat.base_stat)}%"></div>
+							</div>
 						</div>
 					</div>
 				{/each}
-				<!-- Total Stats -->
-				<div class="border-t border-white/20 pt-4 mt-4">
-					<div class="flex items-center gap-4">
-						<div class="w-32 text-white font-bold text-right">Total</div>
-						<div class="w-16 text-white font-bold text-center">
-							{pokemon.stats.reduce((sum, stat) => sum + stat.base_stat, 0)}
-						</div>
-						<div class="flex-1"></div>
-					</div>
-				</div>
 			</div>
-		</div>
 
 		<!-- Abilities Section -->
 		<div class="bg-white/20 backdrop-blur-md rounded-3xl p-8 mb-8">

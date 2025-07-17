@@ -111,7 +111,7 @@
 			{#each generations as generation}
 				{@const generationNameArr = generation.name.split('-')}
 				<a href="{generation.url.split('v2')[1]}" class="flex-1 mx-2">
-					<div class="flex flex-col bg-white/10 backdrop-blur-md rounded-3xl p-8 text-center">
+					<div class="flex flex-col bg-white/10 backdrop-blur-md rounded-3xl p-8 text-center hover:scale-105 hover:bg-white/30 transition-all duration-300">
 						<span class="font-bold text-white">{generationNameArr[0]}</span>
 						<span class="text-white/80">{generationNameArr[1]}</span>
 					</div>
